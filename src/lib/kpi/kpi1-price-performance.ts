@@ -7,6 +7,8 @@ export type PricePerformanceDetail = {
   itemCode: string | null;
   itemNamePo: string;
   currency: string | null;
+  prevPoNo: string;
+  prevPoDate: string;
   prevPrice: number;
   price: number;
   deltaPct: number;
@@ -39,7 +41,10 @@ export function calculatePricePerformance(
         : a.poDate.localeCompare(b.poDate),
     );
 
-  const lastByItem = new Map<string, { price: number; currency: string | null }>();
+  const lastByItem = new Map<
+    string,
+    { price: number; currency: string | null; poNo: string; poDate: string }
+  >();
   const details: PricePerformanceDetail[] = [];
   for (const row of priced) {
     const code = codeByName.get(row.itemNamePo) ?? null;
@@ -56,12 +61,19 @@ export function calculatePricePerformance(
         itemCode: code,
         itemNamePo: row.itemNamePo,
         currency: row.currency,
+        prevPoNo: prev.poNo,
+        prevPoDate: prev.poDate,
         prevPrice: prev.price,
         price: row.unitPrice!,
         deltaPct: ((row.unitPrice! - prev.price) / prev.price) * 100,
       });
     }
-    lastByItem.set(key, { price: row.unitPrice!, currency: row.currency });
+    lastByItem.set(key, {
+      price: row.unitPrice!,
+      currency: row.currency,
+      poNo: row.poNo,
+      poDate: row.poDate,
+    });
   }
 
   if (details.length === 0) return { real: null, sampleSize: 0, details };

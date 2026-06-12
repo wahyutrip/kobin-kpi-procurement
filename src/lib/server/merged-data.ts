@@ -86,6 +86,47 @@ export const REALISASI_VALUES: readonly Realisasi[] = [
   "no_eta",
 ];
 
+export const MERGED_CURRENCIES = ["IDR", "USD", "EUR", "RMB"];
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Parse + sanitize the /data search params shared by the page and CSV export. */
+export function parseMergedParams(sp: Partial<Record<string, string>>): {
+  filters: MergedFilters;
+  sort: string;
+  dir: "asc" | "desc";
+} {
+  const text = (v: string | undefined) => (v ?? "").trim().slice(0, 100);
+  const date = (v: string | undefined) => {
+    const t = (v ?? "").trim();
+    return ISO_DATE.test(t) ? t : "";
+  };
+  return {
+    filters: {
+      q: text(sp.q),
+      prNo: text(sp.prNo),
+      poNo: text(sp.poNo),
+      vendor: text(sp.vendor),
+      item: text(sp.item),
+      scope: sp.scope === "Lokal" || sp.scope === "Impor" ? sp.scope : "all",
+      currency: MERGED_CURRENCIES.includes(sp.currency ?? "") ? sp.currency! : "",
+      realisasi: REALISASI_VALUES.includes(sp.realisasi as Realisasi)
+        ? (sp.realisasi as Realisasi)
+        : "all",
+      prDateFrom: date(sp.prDateFrom),
+      prDateTo: date(sp.prDateTo),
+      poDateFrom: date(sp.poDateFrom),
+      poDateTo: date(sp.poDateTo),
+      etaFrom: date(sp.etaFrom),
+      etaTo: date(sp.etaTo),
+      grpoFrom: date(sp.grpoFrom),
+      grpoTo: date(sp.grpoTo),
+    },
+    sort: sp.sort && sp.sort in SORTABLE_COLUMNS ? sp.sort : "poDate",
+    dir: sp.dir === "asc" ? "asc" : "desc",
+  };
+}
+
 function realisasiOf(
   row: { lokalImpor: string; eta: string | null; grpoDate: string | null },
   today: string,

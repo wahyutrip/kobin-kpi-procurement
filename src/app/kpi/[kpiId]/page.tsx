@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DrilldownTable } from "@/components/drilldown-table";
+import { DataTable } from "@/components/data-table";
 import { monthLabel } from "@/components/format";
 import { getKpiDrilldown } from "@/lib/server/queries";
 
@@ -37,7 +37,7 @@ export default async function KpiDrilldownPage({ params, searchParams }: Props) 
           {rows.length.toLocaleString()} underlying row(s)
         </p>
       </div>
-      <DrilldownTable rows={rows} fileName={`kpi${kpiId}-${month}`} />
+      <DataTable rows={rows} fileName={`kpi${kpiId}-${month}`} />
     </div>
   );
 }

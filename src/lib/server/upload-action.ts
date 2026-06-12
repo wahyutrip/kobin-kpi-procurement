@@ -96,7 +96,7 @@ async function ingestFile(
   const db = getDb();
   const [uploadRow] = await db
     .insert(uploads)
-    .values({ fileType, fileName: file.name })
+    .values({ fileType, fileName: file.name, rawContent: content })
     .returning({ id: uploads.id });
 
   try {

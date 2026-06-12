@@ -35,6 +35,18 @@ test("upload both CSVs in separate slots, dashboard and drill-down update", asyn
 
   await page.goto("/uploads");
   await expect(page.getByText("PO.csv").first()).toBeVisible();
+
+  // upload detail page: warnings with guidance + original-file download
+  await page.getByRole("link", { name: "View" }).first().click();
+  await expect(page.getByText(/Data-quality warnings/)).toBeVisible();
+  await expect(page.getByText(/What to check/i).first()).toBeVisible();
+  const download = page.getByRole("link", { name: /download original file/i });
+  await expect(download).toBeVisible();
+  const resp = await page.request.get(
+    (await download.getAttribute("href")) ?? "",
+  );
+  expect(resp.status()).toBe(200);
+  expect((await resp.text()).length).toBeGreaterThan(1000);
 });
 
 test("merged data page: per-column filters, date pickers, sort, pagination", async ({

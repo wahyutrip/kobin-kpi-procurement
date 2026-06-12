@@ -1,0 +1,1 @@
+ALTER TABLE "uploads" ADD COLUMN "raw_content" text;

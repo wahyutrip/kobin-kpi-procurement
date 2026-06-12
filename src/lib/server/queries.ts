@@ -1,4 +1,4 @@
-import { desc } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { uploads } from "@/lib/db/schema";
 import { computeKpiMatrix, measureKpi } from "@/lib/kpi/engine";
@@ -59,9 +59,40 @@ export async function getKpiDrilldown(
 
 export async function getUploadHistory() {
   const db = getDb();
+  // rawContent excluded — files can be several MB each
   return db
-    .select()
+    .select({
+      id: uploads.id,
+      fileType: uploads.fileType,
+      fileName: uploads.fileName,
+      uploadedAt: uploads.uploadedAt,
+      status: uploads.status,
+      stats: uploads.stats,
+      validationErrors: uploads.validationErrors,
+      warnings: uploads.warnings,
+      hasRawContent: sql<boolean>`${uploads.rawContent} is not null`,
+    })
     .from(uploads)
     .orderBy(desc(uploads.uploadedAt))
-    .limit(50);
+    .limit(100);
+}
+
+export async function getUploadDetail(id: string) {
+  const db = getDb();
+  const [row] = await db
+    .select({
+      id: uploads.id,
+      fileType: uploads.fileType,
+      fileName: uploads.fileName,
+      uploadedAt: uploads.uploadedAt,
+      status: uploads.status,
+      stats: uploads.stats,
+      validationErrors: uploads.validationErrors,
+      warnings: uploads.warnings,
+      hasRawContent: sql<boolean>`${uploads.rawContent} is not null`,
+    })
+    .from(uploads)
+    .where(eq(uploads.id, id))
+    .limit(1);
+  return row ?? null;
 }

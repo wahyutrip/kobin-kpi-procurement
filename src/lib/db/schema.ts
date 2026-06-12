@@ -43,6 +43,8 @@ export const uploads = pgTable("uploads", {
   warnings: jsonb("warnings").$type<
     Array<{ row: number; message: string }>
   >(),
+  // original CSV content, kept so the file can be re-downloaded later
+  rawContent: text("raw_content"),
 });
 
 export const poLines = pgTable(

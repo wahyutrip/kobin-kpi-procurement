@@ -68,6 +68,8 @@ describe("KPI1 price performance", () => {
     const m = calculatePricePerformance(dataset, JAN);
     expect(m.real).toBeCloseTo(-10, 5);
     expect(m.details[0].itemCode).toBe("1010.0001");
+    expect(m.details[0].prevPoNo).toBe("A");
+    expect(m.details[0].prevPoDate).toBe("2025-12-01");
   });
 
   it("skips comparisons across different currencies", () => {

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import {
   getMergedData,
+  MERGED_CURRENCIES,
+  parseMergedParams,
   REALISASI_VALUES,
-  SORTABLE_COLUMNS,
-  type MergedFilters,
   type MergedRow,
   type Realisasi,
 } from "@/lib/server/merged-data";
@@ -13,7 +13,6 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZES = [10, 20, 50, 100, 500, 1000] as const;
 const DEFAULT_PAGE_SIZE = 50;
 const FILTER_FORM = "data-filters";
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const REALISASI_BADGES: Record<Realisasi, [string, string]> = {
   on_time: ["On time", "bg-emerald-100 text-emerald-900"],
@@ -23,18 +22,9 @@ const REALISASI_BADGES: Record<Realisasi, [string, string]> = {
   no_eta: ["No ETA", "bg-slate-100 text-slate-500"],
 };
 
-const CURRENCIES = ["IDR", "USD", "EUR", "RMB"];
+const CURRENCIES = MERGED_CURRENCIES;
 
 type Search = Partial<Record<string, string>>;
-
-function cleanText(v: string | undefined): string {
-  return (v ?? "").trim().slice(0, 100);
-}
-
-function cleanDate(v: string | undefined): string {
-  const t = (v ?? "").trim();
-  return ISO_DATE.test(t) ? t : "";
-}
 
 export default async function DataPage({
   searchParams,
@@ -42,28 +32,7 @@ export default async function DataPage({
   searchParams: Promise<Search>;
 }) {
   const sp = await searchParams;
-  const filters: MergedFilters = {
-    q: cleanText(sp.q),
-    prNo: cleanText(sp.prNo),
-    poNo: cleanText(sp.poNo),
-    vendor: cleanText(sp.vendor),
-    item: cleanText(sp.item),
-    scope: sp.scope === "Lokal" || sp.scope === "Impor" ? sp.scope : "all",
-    currency: CURRENCIES.includes(sp.currency ?? "") ? sp.currency! : "",
-    realisasi: REALISASI_VALUES.includes(sp.realisasi as Realisasi)
-      ? (sp.realisasi as Realisasi)
-      : "all",
-    prDateFrom: cleanDate(sp.prDateFrom),
-    prDateTo: cleanDate(sp.prDateTo),
-    poDateFrom: cleanDate(sp.poDateFrom),
-    poDateTo: cleanDate(sp.poDateTo),
-    etaFrom: cleanDate(sp.etaFrom),
-    etaTo: cleanDate(sp.etaTo),
-    grpoFrom: cleanDate(sp.grpoFrom),
-    grpoTo: cleanDate(sp.grpoTo),
-  };
-  const sort = sp.sort && sp.sort in SORTABLE_COLUMNS ? sp.sort : "poDate";
-  const dir = sp.dir === "asc" ? "asc" : "desc";
+  const { filters, sort, dir } = parseMergedParams(sp);
   const page = Math.max(1, Number(sp.page) || 1);
   const pageSize = (PAGE_SIZES as readonly number[]).includes(Number(sp.pageSize))
     ? Number(sp.pageSize)
@@ -129,6 +98,12 @@ export default async function DataPage({
               Clear all filters
             </Link>
           )}
+          <a
+            href={`/api/data/export${url({ page: "", pageSize: "" }).slice("/data".length)}`}
+            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50"
+          >
+            Export CSV
+          </a>
           <button
             type="submit"
             form={FILTER_FORM}
