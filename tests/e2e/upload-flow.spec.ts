@@ -65,6 +65,16 @@ test("merged data page: per-column filters, date pickers, sort, pagination", asy
   await page.getByRole("link", { name: /Unit Price/ }).click();
   await expect(page).toHaveURL(/sort=unitPrice/);
 
+  // per-column clear link
+  await page.goto("/data?vendor=SHOPEE");
+  await page.getByRole("link", { name: /✕ clear/ }).click();
+  await expect(page).not.toHaveURL(/vendor=/);
+
+  // page size selector
+  await page.goto("/data");
+  await page.getByRole("link", { name: "100", exact: true }).click();
+  await expect(page).toHaveURL(/pageSize=100/);
+
   // pagination
   await page.goto("/data");
   await page.getByRole("link", { name: "Next →" }).click();

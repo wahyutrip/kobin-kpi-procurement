@@ -10,7 +10,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZES = [10, 20, 50, 100, 500, 1000] as const;
+const DEFAULT_PAGE_SIZE = 50;
 const FILTER_FORM = "data-filters";
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -64,27 +65,41 @@ export default async function DataPage({
   const sort = sp.sort && sp.sort in SORTABLE_COLUMNS ? sp.sort : "poDate";
   const dir = sp.dir === "asc" ? "asc" : "desc";
   const page = Math.max(1, Number(sp.page) || 1);
+  const pageSize = (PAGE_SIZES as readonly number[]).includes(Number(sp.pageSize))
+    ? Number(sp.pageSize)
+    : DEFAULT_PAGE_SIZE;
 
   const { rows, totalRows } = await getMergedData({
     ...filters,
     sort,
     dir,
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
   });
-  const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
   const activeFilterCount = Object.values(filters).filter(
     (v) => v !== "" && v !== "all",
   ).length;
 
   const url = (over: Search) => {
     const params = new URLSearchParams();
-    const all: Search = { ...filters, sort, dir, page: String(page), ...over };
+    const all: Search = {
+      ...filters,
+      sort,
+      dir,
+      page: String(page),
+      pageSize: String(pageSize),
+      ...over,
+    };
     for (const [k, v] of Object.entries(all)) {
       if (v && v !== "all") params.set(k, v);
     }
     return `/data?${params.toString()}`;
   };
+
+  // clears just one column's filter keys (date columns clear from+to)
+  const clearUrl = (...keys: string[]) =>
+    url({ ...Object.fromEntries(keys.map((k) => [k, ""])), page: "1" });
 
   const sortLink = (key: string) =>
     url({ sort: key, dir: sort === key && dir === "desc" ? "asc" : "desc", page: "1" });
@@ -128,6 +143,7 @@ export default async function DataPage({
       <form id={FILTER_FORM} action="/data">
         <input type="hidden" name="sort" value={sort} />
         <input type="hidden" name="dir" value={dir} />
+        <input type="hidden" name="pageSize" value={pageSize} />
         <input
           type="search"
           name="q"
@@ -157,48 +173,76 @@ export default async function DataPage({
               <Th label="Realisasi" />
             </tr>
             <tr className="bg-slate-50">
-              <Fc>
+              <Fc clearHref={filters.prNo ? clearUrl("prNo") : null}>
                 <TextFilter name="prNo" value={filters.prNo} />
               </Fc>
-              <Fc>
+              <Fc
+                clearHref={
+                  filters.prDateFrom || filters.prDateTo
+                    ? clearUrl("prDateFrom", "prDateTo")
+                    : null
+                }
+              >
                 <DateRangeFilter from={["prDateFrom", filters.prDateFrom]} to={["prDateTo", filters.prDateTo]} />
               </Fc>
-              <Fc>
+              <Fc clearHref={filters.poNo ? clearUrl("poNo") : null}>
                 <TextFilter name="poNo" value={filters.poNo} />
               </Fc>
-              <Fc>
+              <Fc
+                clearHref={
+                  filters.poDateFrom || filters.poDateTo
+                    ? clearUrl("poDateFrom", "poDateTo")
+                    : null
+                }
+              >
                 <DateRangeFilter from={["poDateFrom", filters.poDateFrom]} to={["poDateTo", filters.poDateTo]} />
               </Fc>
-              <Fc>
+              <Fc clearHref={filters.scope !== "all" ? clearUrl("scope") : null}>
                 <SelectFilter
                   name="scope"
                   value={filters.scope}
                   options={[["all", "All"], ["Lokal", "Lokal"], ["Impor", "Impor"]]}
                 />
               </Fc>
-              <Fc>
+              <Fc clearHref={filters.vendor ? clearUrl("vendor") : null}>
                 <TextFilter name="vendor" value={filters.vendor} />
               </Fc>
-              <Fc>
+              <Fc clearHref={filters.item ? clearUrl("item") : null}>
                 <TextFilter name="item" value={filters.item} />
               </Fc>
               <Fc />
               <Fc />
-              <Fc>
+              <Fc clearHref={filters.currency ? clearUrl("currency") : null}>
                 <SelectFilter
                   name="currency"
                   value={filters.currency || "all"}
                   options={[["all", "All"], ...CURRENCIES.map((c): [string, string] => [c, c])]}
                 />
               </Fc>
-              <Fc>
+              <Fc
+                clearHref={
+                  filters.etaFrom || filters.etaTo
+                    ? clearUrl("etaFrom", "etaTo")
+                    : null
+                }
+              >
                 <DateRangeFilter from={["etaFrom", filters.etaFrom]} to={["etaTo", filters.etaTo]} />
               </Fc>
               <Fc />
-              <Fc>
+              <Fc
+                clearHref={
+                  filters.grpoFrom || filters.grpoTo
+                    ? clearUrl("grpoFrom", "grpoTo")
+                    : null
+                }
+              >
                 <DateRangeFilter from={["grpoFrom", filters.grpoFrom]} to={["grpoTo", filters.grpoTo]} />
               </Fc>
-              <Fc>
+              <Fc
+                clearHref={
+                  filters.realisasi !== "all" ? clearUrl("realisasi") : null
+                }
+              >
                 <SelectFilter
                   name="realisasi"
                   value={filters.realisasi}
@@ -240,8 +284,26 @@ export default async function DataPage({
           disabled={page >= totalPages}
           label="Next →"
         />
-        <span className="ml-auto text-xs text-slate-400">
-          {PAGE_SIZE} rows per page · filters apply on Enter or “Apply filters”
+        <span className="ml-auto flex items-center gap-1.5 text-xs text-slate-500">
+          Rows per page:
+          {PAGE_SIZES.map((size) =>
+            size === pageSize ? (
+              <span
+                key={size}
+                className="rounded-md bg-slate-900 px-2 py-0.5 font-semibold text-white"
+              >
+                {size}
+              </span>
+            ) : (
+              <Link
+                key={size}
+                href={url({ pageSize: String(size), page: "1" })}
+                className="rounded-md px-2 py-0.5 text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+              >
+                {size}
+              </Link>
+            ),
+          )}
         </span>
       </div>
     </div>
@@ -262,11 +324,25 @@ function Th({ label, href }: { label: string; href?: string }) {
   );
 }
 
-/** Filter cell */
-function Fc({ children }: { children?: React.ReactNode }) {
+/** Filter cell with an optional per-column clear link */
+function Fc({
+  children,
+  clearHref,
+}: {
+  children?: React.ReactNode;
+  clearHref?: string | null;
+}) {
   return (
     <td className="border-b-2 border-slate-200 px-1.5 py-1.5 align-top">
       {children}
+      {clearHref && (
+        <Link
+          href={clearHref}
+          className="mt-1 block text-center text-[10px] font-semibold text-rose-600 hover:underline"
+        >
+          ✕ clear
+        </Link>
+      )}
     </td>
   );
 }
