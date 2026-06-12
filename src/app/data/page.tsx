@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MERGE_EXPLANATION } from "@/lib/kpi/methodology";
 import {
   getMergedData,
   MERGED_CURRENCIES,
@@ -113,6 +114,30 @@ export default async function DataPage({
           </button>
         </div>
       </div>
+
+      <details className="group rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <summary className="cursor-pointer select-none px-5 py-3.5 text-sm font-bold text-slate-900 hover:text-indigo-700">
+          {MERGE_EXPLANATION.title}
+          <span className="ml-2 text-xs font-normal text-slate-400 group-open:hidden">
+            — click to expand
+          </span>
+        </summary>
+        <div className="space-y-3 border-t border-slate-100 px-5 py-4">
+          {MERGE_EXPLANATION.paragraphs.map((p, i) => (
+            <p key={i} className="text-sm leading-relaxed text-slate-700">
+              {p}
+            </p>
+          ))}
+          <p className="text-xs text-slate-500">
+            Each KPI&apos;s own merge and formula details are on its
+            methodology page — click any KPI title on the{" "}
+            <Link href="/" className="text-indigo-700 hover:underline">
+              dashboard
+            </Link>
+            .
+          </p>
+        </div>
+      </details>
 
       {/* The filter inputs in the table header belong to this form */}
       <form id={FILTER_FORM} action="/data">

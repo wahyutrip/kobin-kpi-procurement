@@ -63,10 +63,19 @@ export function KpiMatrixTable({ defs, periods }: Props) {
           {enabled.map((def) => (
             <tr key={def.kpiId} className="group">
               <td className="sticky left-0 z-10 max-w-72 border-b border-slate-100 bg-white px-4 py-2.5 font-medium text-slate-900 group-hover:bg-slate-50">
-                <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-md bg-slate-900 text-[10px] font-bold text-white">
-                  {def.kpiId}
-                </span>
-                {def.name}
+                <Link
+                  href={`/methodology/${def.kpiId}`}
+                  title="How is this KPI calculated?"
+                  className="hover:text-indigo-700"
+                >
+                  <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-md bg-slate-900 text-[10px] font-bold text-white">
+                    {def.kpiId}
+                  </span>
+                  {def.name}
+                  <span className="ml-1.5 align-middle text-[10px] text-slate-400">
+                    ⓘ
+                  </span>
+                </Link>
               </td>
               <td className="border-b border-slate-100 px-2 py-2.5 text-center font-semibold text-slate-700">
                 {(def.weight * 100).toFixed(0)}%
