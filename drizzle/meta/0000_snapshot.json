@@ -1,0 +1,799 @@
+{
+  "id": "25bcbcb8-c95b-488b-a4b4-e45fe1e0d9d1",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.kpi_config": {
+      "name": "kpi_config",
+      "schema": "",
+      "columns": {
+        "kpi_id": {
+          "name": "kpi_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weight": {
+          "name": "weight",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "std_value": {
+          "name": "std_value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "std_label": {
+          "name": "std_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scoring": {
+          "name": "scoring",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tolerance_days": {
+          "name": "tolerance_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aggregation": {
+          "name": "aggregation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'monthly'"
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.kpi_manual_entries": {
+      "name": "kpi_manual_entries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kpi_id": {
+          "name": "kpi_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "kpi_manual_entries_month_kpi": {
+          "name": "kpi_manual_entries_month_kpi",
+          "columns": [
+            {
+              "expression": "month",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kpi_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "kpi_manual_entries_kpi_id_kpi_config_kpi_id_fk": {
+          "name": "kpi_manual_entries_kpi_id_kpi_config_kpi_id_fk",
+          "tableFrom": "kpi_manual_entries",
+          "tableTo": "kpi_config",
+          "columnsFrom": [
+            "kpi_id"
+          ],
+          "columnsTo": [
+            "kpi_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.kpi_monthly_results": {
+      "name": "kpi_monthly_results",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kpi_id": {
+          "name": "kpi_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "real_value": {
+          "name": "real_value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "std_value": {
+          "name": "std_value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "achievement_pct": {
+          "name": "achievement_pct",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capai": {
+          "name": "capai",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sample_size": {
+          "name": "sample_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "calculated_at": {
+          "name": "calculated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "kpi_monthly_results_month_kpi": {
+          "name": "kpi_monthly_results_month_kpi",
+          "columns": [
+            {
+              "expression": "month",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kpi_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "kpi_monthly_results_kpi_id_kpi_config_kpi_id_fk": {
+          "name": "kpi_monthly_results_kpi_id_kpi_config_kpi_id_fk",
+          "tableFrom": "kpi_monthly_results",
+          "tableTo": "kpi_config",
+          "columnsFrom": [
+            "kpi_id"
+          ],
+          "columnsTo": [
+            "kpi_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.po_lines": {
+      "name": "po_lines",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pr_no": {
+          "name": "pr_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pr_date": {
+          "name": "pr_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pr_status": {
+          "name": "pr_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "item_name_pr": {
+          "name": "item_name_pr",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required_qty": {
+          "name": "required_qty",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required_date": {
+          "name": "required_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "request_by": {
+          "name": "request_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "po_no": {
+          "name": "po_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "po_date": {
+          "name": "po_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lokal_impor": {
+          "name": "lokal_impor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "po_status": {
+          "name": "po_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vendor_code": {
+          "name": "vendor_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vendor_name": {
+          "name": "vendor_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "eta": {
+          "name": "eta",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "item_name_po": {
+          "name": "item_name_po",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "qty_po": {
+          "name": "qty_po",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "uom_po": {
+          "name": "uom_po",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unit_price": {
+          "name": "unit_price",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_po": {
+          "name": "total_po",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outstanding_qty": {
+          "name": "outstanding_qty",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "top": {
+          "name": "top",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remarks": {
+          "name": "remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "line_seq": {
+          "name": "line_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "last_upload_id": {
+          "name": "last_upload_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "po_lines_natural_key": {
+          "name": "po_lines_natural_key",
+          "columns": [
+            {
+              "expression": "pr_no",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "po_no",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "item_name_po",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "po_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "line_seq",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "po_lines_last_upload_id_uploads_id_fk": {
+          "name": "po_lines_last_upload_id_uploads_id_fk",
+          "tableFrom": "po_lines",
+          "tableTo": "uploads",
+          "columnsFrom": [
+            "last_upload_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pr_gr_lines": {
+      "name": "pr_gr_lines",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pr_no": {
+          "name": "pr_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pr_date": {
+          "name": "pr_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_group": {
+          "name": "item_group",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "item_code": {
+          "name": "item_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_name": {
+          "name": "item_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qty_requested": {
+          "name": "qty_requested",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "po_no": {
+          "name": "po_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "po_date": {
+          "name": "po_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qty_po": {
+          "name": "qty_po",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pr_to_po_days": {
+          "name": "pr_to_po_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "grpo_no": {
+          "name": "grpo_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "grpo_date": {
+          "name": "grpo_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qty_grpo": {
+          "name": "qty_grpo",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "po_to_grpo_days": {
+          "name": "po_to_grpo_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "line_seq": {
+          "name": "line_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "last_upload_id": {
+          "name": "last_upload_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pr_gr_lines_last_upload_id_uploads_id_fk": {
+          "name": "pr_gr_lines_last_upload_id_uploads_id_fk",
+          "tableFrom": "pr_gr_lines",
+          "tableTo": "uploads",
+          "columnsFrom": [
+            "last_upload_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pr_gr_lines_natural_key": {
+          "name": "pr_gr_lines_natural_key",
+          "nullsNotDistinct": true,
+          "columns": [
+            "pr_no",
+            "item_code",
+            "po_no",
+            "grpo_no",
+            "line_seq"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.uploads": {
+      "name": "uploads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "file_type": {
+          "name": "file_type",
+          "type": "file_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uploaded_at": {
+          "name": "uploaded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "status": {
+          "name": "status",
+          "type": "upload_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'processing'"
+        },
+        "stats": {
+          "name": "stats",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validation_errors": {
+          "name": "validation_errors",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "warnings": {
+          "name": "warnings",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.vendors": {
+      "name": "vendors",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "vendor_code": {
+          "name": "vendor_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vendor_name": {
+          "name": "vendor_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_po_date": {
+          "name": "first_po_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "vendors_vendor_code_unique": {
+          "name": "vendors_vendor_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "vendor_code"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.file_type": {
+      "name": "file_type",
+      "schema": "public",
+      "values": [
+        "po",
+        "pr_gr"
+      ]
+    },
+    "public.upload_status": {
+      "name": "upload_status",
+      "schema": "public",
+      "values": [
+        "processing",
+        "success",
+        "partial",
+        "failed"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
